@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 
+
 class Popular extends StatefulWidget {
 
   @override
@@ -23,6 +24,10 @@ class _PopularState extends State<Popular> {
   Color _getRandomColor() {
     return colorsList[random.nextInt(colorsList.length)];
   }
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(

@@ -1,7 +1,10 @@
 import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
-
+import 'package:news_app/api/posts_api.dart';
+import 'package:news_app/models/post.dart';
+import 'package:news_app/utilities/data_utilities.dart';
 class Favourites extends StatefulWidget {
   @override
   _FavouritesState createState() => _FavouritesState();
@@ -9,29 +12,56 @@ class Favourites extends StatefulWidget {
 
 class _FavouritesState extends State<Favourites> {
 
-
+  PostsAPI postsAPI = PostsAPI() ;
   @override
 
 
   Widget build(BuildContext context) {
-    return ListView.builder(itemBuilder: (context, position) {
-      return Card(
-        child:_drawSingleRow(),
-      );
-    },
-      itemCount: 20,
+    return FutureBuilder(
+      future: postsAPI.fetchPostsByCategoryId("3"),
+      builder: (context,AsyncSnapshot snapShot){
+        switch (snapShot.connectionState) {
+          case ConnectionState.none :
+            return connectionError();
+            break ;
+          case ConnectionState.waiting:
+            return loading();
+            break ;
+          case ConnectionState.active:
+            return loading();
+            break ;
+          case ConnectionState.done:
+            if(snapShot.hasError){
+              return error(snapShot.error);
+            }else{
+              List<Post> posts = snapShot.data ;
+              return ListView.builder(itemBuilder: (context, position) {
+                return Card(
+                  child:_drawSingleRow(posts[position]),
+                );
+              },
+                itemCount: posts.length,
+              );
+            }
+
+            break ;
+
+
+        }
+
+      },
     );
   }
 
 
-  Widget _drawSingleRow() {
+  Widget _drawSingleRow(Post post) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
         children: <Widget>[
           SizedBox(
             child: Image(
-              image: ExactAssetImage('assets/images/placeholder_bg.png'),
+              image: NetworkImage(post.featuredImage),
               fit: BoxFit.cover,
             ),
             width: 124,
@@ -44,7 +74,7 @@ class _FavouritesState extends State<Favourites> {
             child: Column(
               children: <Widget>[
                 Text(
-                  "The World Global Warming Annual Summit",
+                  post.title,
                   maxLines: 2,
                   style: TextStyle(
                     fontSize: 18,
@@ -61,7 +91,7 @@ class _FavouritesState extends State<Favourites> {
                     Row(
                       children: <Widget>[
                         Icon(Icons.timer),
-                        Text("15 min"),
+                        Text(parseHumanDateTime(post.dateWritten)),
                       ],
                     ),
                   ],

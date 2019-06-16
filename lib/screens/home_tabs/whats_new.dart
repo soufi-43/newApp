@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/api/posts_api.dart';
 import 'dart:async';
+import 'package:news_app/utilities/data_utilities.dart';
 
 import 'package:news_app/models/post.dart';
-import 'package:timeago/timeago.dart' as timeago;
+
 
 class WhatsNew extends StatefulWidget {
   @override
@@ -89,23 +90,23 @@ class _WhatsNewState extends State<WhatsNew> {
             padding: EdgeInsets.all(8.0),
             child: Card(
               child: FutureBuilder(
-                future: postsAPI.fetchWhatsNew(),
+                future: postsAPI.fetchPostsByCategoryId("1"),
                 builder: (context, AsyncSnapshot snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.waiting:
-                      return _loading();
+                      return loading();
                       break;
                     case ConnectionState.active:
-                      return _loading();
+                      return loading();
                       break;
                     case ConnectionState.none:
                       // to do hundle erreor
-                      return _connectionError();
+                      return connectionError();
                       break;
                     case ConnectionState.done:
                       if (snapshot.error != null) {
                         //to handle error
-                        return _error(snapshot.error);
+                        return error(snapshot.error);
                       } else {
                         if (snapshot.hasData) {
                           List<Post> posts = snapshot.data;
@@ -123,10 +124,10 @@ class _WhatsNewState extends State<WhatsNew> {
                               ],
                             );
                           } else {
-                            return _noDtata();
+                            return noData();
                           }
                         } else {
-                          return _noDtata();
+                          return noData();
                           //to do handle no data
                         }
                       }
@@ -145,21 +146,21 @@ class _WhatsNewState extends State<WhatsNew> {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: FutureBuilder(
-        future: postsAPI.fetchRecentUpdates(),
+        future: postsAPI.fetchPostsByCategoryId("2"),
         builder: (context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.none:
-              return _connectionError();
+              return connectionError();
               break;
             case ConnectionState.active:
-              return _loading();
+              return loading();
               break;
             case ConnectionState.waiting:
-              return _loading();
+              return loading();
               break;
             case ConnectionState.done:
               if (snapshot.hasError) {
-                return _error(snapshot.error);
+                return error(snapshot.error);
               } else {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,7 +223,7 @@ class _WhatsNewState extends State<WhatsNew> {
                     Row(
                       children: <Widget>[
                         Icon(Icons.timer),
-                        Text(_parseHumanDateTime(post.dateWritten)),
+                        Text(parseHumanDateTime(post.dateWritten)),
                       ],
                     ),
                   ],
@@ -235,11 +236,7 @@ class _WhatsNewState extends State<WhatsNew> {
     );
   }
 
-  String _parseHumanDateTime(String dateTime) {
-    Duration timeAgo = DateTime.now().difference(DateTime.parse(dateTime));
-    DateTime theDifference = DateTime.now().subtract(timeAgo);
-    return timeago.format(theDifference);
-  }
+
 
   Widget _drawDivider() {
     return Container(
@@ -318,7 +315,7 @@ class _WhatsNewState extends State<WhatsNew> {
                   width: 4,
                 ),
                 Text(
-                  _parseHumanDateTime(post.dateWritten),
+                  parseHumanDateTime(post.dateWritten),
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
@@ -332,33 +329,7 @@ class _WhatsNewState extends State<WhatsNew> {
     );
   }
 
-  Widget _loading() {
-    return Container(
-      padding: EdgeInsets.only(top: 16, bottom: 16),
-      child: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
 
-  Widget _connectionError() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Text("connection error"),
-    );
-  }
 
-  Widget _error(var error) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Text(error.toString()),
-    );
-  }
 
-  Widget _noDtata() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Text("No Data Available"),
-    );
-  }
 }
