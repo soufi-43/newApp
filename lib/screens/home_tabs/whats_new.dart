@@ -105,7 +105,7 @@ class _WhatsNewState extends State<WhatsNew> {
                     case ConnectionState.done:
                       if (snapshot.error != null) {
                         //to handle error
-                        return _error(snapshot.error) ;
+                        return _error(snapshot.error);
                       } else {
                         if (snapshot.hasData) {
                           List<Post> posts = snapshot.data;
@@ -144,19 +144,43 @@ class _WhatsNewState extends State<WhatsNew> {
   Widget _drawRecentUpdates() {
     return Padding(
       padding: EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 18, bottom: 8, top: 8),
-            child: _drawSectionTitle("Recent Updates"),
-          ),
-          _drawRecentUpdatesCards(Colors.deepOrange),
-          _drawRecentUpdatesCards(Colors.teal),
-          SizedBox(
-            height: 48,
-          ),
-        ],
+      child: FutureBuilder(
+        future: postsAPI.fetchRecentUpdates(),
+        builder: (context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return _connectionError();
+              break;
+            case ConnectionState.active:
+              return _loading();
+              break;
+            case ConnectionState.waiting:
+              return _loading();
+              break;
+            case ConnectionState.done:
+              if (snapshot.hasError) {
+                return _error(snapshot.error);
+              } else {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 18, bottom: 8, top: 8),
+                      child: _drawSectionTitle("Recent Updates"),
+                    ),
+                    _drawRecentUpdatesCards(Colors.deepOrange,snapshot.data[0]),
+                    _drawRecentUpdatesCards(Colors.teal,snapshot.data[1]),
+                    SizedBox(
+                      height: 48,
+                    ),
+                  ],
+                );
+              }
+
+              break;
+          }
+        },
       ),
     );
   }
@@ -235,7 +259,7 @@ class _WhatsNewState extends State<WhatsNew> {
     );
   }
 
-  Widget _drawRecentUpdatesCards(Color color) {
+  Widget _drawRecentUpdatesCards(Color color, Post post) {
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,7 +267,7 @@ class _WhatsNewState extends State<WhatsNew> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: ExactAssetImage("assets/images/placeholder_bg.png"),
+                image: NetworkImage(post.featuredImage),
                 fit: BoxFit.cover,
               ),
             ),
@@ -275,7 +299,7 @@ class _WhatsNewState extends State<WhatsNew> {
               bottom: 8,
             ),
             child: Text(
-              'Vettal is Ferrari Number One+Hamilton',
+              post.title,
               style: TextStyle(
                 fontSize: 18,
               ),
@@ -294,7 +318,7 @@ class _WhatsNewState extends State<WhatsNew> {
                   width: 4,
                 ),
                 Text(
-                  "15 Min",
+                  _parseHumanDateTime(post.dateWritten),
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
