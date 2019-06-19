@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:news_app/models/nav_menu.dart';
 import 'package:news_app/screens/home_screen.dart';
@@ -5,6 +7,12 @@ import 'package:news_app/screens/headline_news.dart';
 import 'package:news_app/screens/twitter_feed.dart';
 import 'package:news_app/screens/instagram_feed.dart';
 import 'package:news_app/screens/facebook_feeds.dart';
+import 'package:news_app/utilities/app_utilities.dart';
+import 'package:news_app/screens/pages/login.dart';
+
+
+
+
 
 class NavigationDrawer extends StatefulWidget {
   @override
@@ -12,14 +20,36 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
+
+  static bool isLoggedIn = false ;
+
+
+
   List<navMenuItem> navigationMenu = [
     navMenuItem("Explore", () => HomeScreen()),
     navMenuItem("HeadLine News", () => HeadLineNews()),
     navMenuItem("Twitter Feeds", () => TwitterFeed()),
     navMenuItem("Instagram Feeds", () => InstagramFeed()),
-    navMenuItem("Facebook_Feeds", () => FacebookFeeds(),
-    )
+    navMenuItem("Facebook_Feeds", () => FacebookFeeds()),
+
+    navMenuItem("Login", () => Login()),
+
+
+    //navMenuItem("Register", () => FacebookFeeds()),
+
   ];
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(isLoggedIn){
+      navigationMenu.add(navMenuItem("Logout", () => FacebookFeeds()));
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
