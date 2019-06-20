@@ -9,7 +9,7 @@ import 'package:news_app/screens/instagram_feed.dart';
 import 'package:news_app/screens/facebook_feeds.dart';
 import 'package:news_app/utilities/app_utilities.dart';
 import 'package:news_app/screens/pages/login.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -24,6 +24,10 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
   static bool isLoggedIn = false ;
 
 
+  String token ;
+  SharedPreferences sharedPreferences ;
+
+
 
   List<navMenuItem> navigationMenu = [
     navMenuItem("Explore", () => HomeScreen()),
@@ -31,28 +35,46 @@ class _NavigationDrawerState extends State<NavigationDrawer> {
     navMenuItem("Twitter Feeds", () => TwitterFeed()),
     navMenuItem("Instagram Feeds", () => InstagramFeed()),
     navMenuItem("Facebook_Feeds", () => FacebookFeeds()),
-
     navMenuItem("Login", () => Login()),
-
-
     //navMenuItem("Register", () => FacebookFeeds()),
-
   ];
 
+  checkToken()async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    token = sharedPreferences.getString('token') ;
+    setState(() {
+      if(token==null){
+          isLoggedIn = false ;
+      }else {
+        isLoggedIn = true ;
+      }
+    });
+  }
 
+_logout(){
+  if(sharedPreferences!= null){
+    sharedPreferences.remove("token");
+
+  }
+  return HomeScreen() ;
+}
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     if(isLoggedIn){
-      navigationMenu.add(navMenuItem("Logout", () => FacebookFeeds()));
+      navigationMenu.add(navMenuItem("Logout", _logout));
     }
 
   }
 
   @override
   Widget build(BuildContext context) {
+    if(this.mounted){
+
+    }
+    checkToken();
     return Drawer(
       child: Padding(
         padding: const EdgeInsets.only(
